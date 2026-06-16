@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head> 
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Financas</title>
@@ -282,11 +282,15 @@ function parseData(raw) {
   // formato DD/MM/YYYY
   if (s.includes('/')) {
     const p = s.split('/');
-    if (p.length >= 3) return new Date(p[2].slice(0,4), p[1]-1, p[0]);
+    if (p.length >= 3) return new Date(parseInt(p[2].slice(0,4)), parseInt(p[1])-1, parseInt(p[0]));
   }
-  // formato ISO 2026-06-01T...
-  if (s.includes('T') || s.match(/^\d{4}-\d{2}-\d{2}/)) {
-    return new Date(s);
+  // formato ISO do Google Sheets: YYYY-DD-MMT... (dia e mes invertidos por fuso horario)
+  if (s.includes('T')) {
+    const p = s.slice(0,10).split('-');
+    if (p.length === 3) {
+      // p[0]=ano, p[1]=dia, p[2]=mes
+      return new Date(parseInt(p[0]), parseInt(p[2])-1, parseInt(p[1]));
+    }
   }
   return null;
 }
