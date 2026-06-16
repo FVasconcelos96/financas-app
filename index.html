@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Financas</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0f0f13;--s:#1a1a22;--b:#2e2e3e;--t:#f0f0f5;--m:#7070a0;--g:#4ade80;--r:#f87171;--bl:#60a5fa;--y:#fbbf24;--p:#a78bfa}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);display:flex;justify-content:center;min-height:100vh}
+.phone{width:100%;max-width:430px;padding:16px 16px 90px}
+.hdr{padding:20px 0 16px;display:flex;justify-content:space-between;align-items:flex-start}
+.hdr-l .gr{font-size:11px;color:var(--m);text-transform:uppercase;letter-spacing:.05em}
+.hdr-l .mo{font-size:22px;font-weight:700;margin-top:2px}
+.hdr-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.hdr-r .dt{font-size:12px;color:var(--m)}
+.rbtn{background:var(--s);border:1px solid var(--b);border-radius:8px;color:var(--m);font-size:11px;padding:4px 10px;cursor:pointer;font-family:inherit}
+.scr{display:none}.scr.on{display:block}
+/* CARDS */
+.disp{border-radius:16px;padding:18px;margin-bottom:10px}
+.disp.ok{background:linear-gradient(135deg,#1e2a1e,#1a2e1a);border:1px solid #2e4a2e}
+.disp.ng{background:linear-gradient(135deg,#2a1e1e,#2e1a1a);border:1px solid #4a2e2e}
+.disp.wt{background:linear-gradient(135deg,#1e1e2a,#1a1a2e);border:1px solid #2e2e4a}
+.clb{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.disp.ok .clb{color:#5a8a5a}.disp.ng .clb{color:#8a5a5a}.disp.wt .clb{color:#5a5a8a}
+.cvb{font-size:28px;font-weight:700;letter-spacing:-.02em}
+.disp.ok .cvb{color:var(--g)}.disp.ng .cvb{color:var(--r)}.disp.wt .cvb{color:var(--bl)}
+.csb{font-size:11px;color:var(--m);margin-top:4px}
+.disp.ng .csb{color:#a07070}.disp.wt .csb{color:#7070a0}
+.pbg{background:var(--b);border-radius:99px;height:6px;overflow:hidden;margin-top:12px}
+.pfl{height:100%;border-radius:99px;transition:width .5s}
+.plb{display:flex;justify-content:space-between;font-size:10px;color:var(--m);margin-top:5px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.card{background:var(--s);border-radius:16px;padding:16px;border:1px solid var(--b)}
+.card.full{grid-column:1/-1}
+.card .clb{color:var(--m)}
+.cv{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.cv.g{color:var(--g)}.cv.y{color:var(--y)}.cv.bl{color:var(--bl)}
+.card .csb{color:var(--m);font-size:11px;margin-top:4px}
+.stit{font-size:12px;font-weight:600;color:var(--m);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 10px}
+/* LANCAMENTOS */
+.lanc{display:flex;align-items:center;padding:12px 14px;background:var(--s);border-radius:12px;margin-bottom:6px;border:1px solid var(--b);gap:10px}
+.ll{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.ld{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lm{font-size:11px;color:var(--m)}
+.lmid{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.bdg{font-size:9px;font-weight:600;padding:2px 7px;border-radius:99px;text-transform:uppercase}
+.bcc{background:#1a2a1a;color:var(--g)}.bct{background:#2a1f3d;color:var(--p)}.bsw{background:#2a2210;color:var(--y)}.brc{background:#1a2a2a;color:var(--bl)}
+.lp{font-size:9px;color:var(--p);font-weight:500}
+.lv{font-size:14px;font-weight:600}
+.lv.gasto{color:var(--r)}.lv.rec{color:var(--g)}
+.xbtn{background:transparent;border:none;color:#4a3a3a;font-size:16px;cursor:pointer;padding:4px;flex-shrink:0}
+.xbtn:active{color:var(--r)}
+.empty{text-align:center;padding:40px 20px;color:var(--m);font-size:13px}
+.load{text-align:center;padding:30px;color:var(--m);font-size:13px}
+/* FORM */
+.ftit{font-size:18px;font-weight:700;margin-bottom:6px}
+.fsub{font-size:13px;color:var(--m);margin-bottom:20px}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.tbtn{padding:13px 8px;border-radius:10px;border:1px solid var(--b);background:var(--s);color:var(--m);font-size:13px;font-weight:600;cursor:pointer;text-align:center;font-family:inherit}
+.tbtn.sg{border-color:var(--r);color:var(--r);background:#2a1a1a}
+.tbtn.sr{border-color:var(--g);color:var(--g);background:#1a2a1a}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:11px;font-weight:600;color:var(--m);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.fld input,.fld select{width:100%;background:var(--s);border:1px solid var(--b);border-radius:10px;padding:13px 14px;color:var(--t);font-size:15px;font-family:inherit;outline:none;appearance:none;-webkit-appearance:none}
+.fld input:focus,.fld select:focus{border-color:var(--bl)}
+.fld select option{background:#1a1a22}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.mbtn{padding:13px 8px;border-radius:10px;border:1px solid var(--b);background:var(--s);color:var(--m);font-size:12px;font-weight:500;cursor:pointer;text-align:center;font-family:inherit}
+.mbtn.sp{border-color:var(--g);color:var(--g);background:#1a2a1a}
+.mbtn.sc{border-color:var(--p);color:var(--p);background:#1e1a2e}
+.mbtn.ss{border-color:var(--y);color:var(--y);background:#2a2210}
+.pfield{display:none}.pfield.on{display:block}
+.gfields{display:none}.gfields.on{display:block}
+.lbtn{width:100%;padding:16px;border-radius:14px;border:none;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit}
+.lbtn:disabled{opacity:.5;cursor:not-allowed}
+.lbtn.g{background:var(--r);color:#1a0a0a}
+.lbtn.r{background:var(--g);color:#0a1a0a}
+/* SWILE */
+.swh{background:linear-gradient(135deg,#2a2210,#221a08);border:1px solid #3a3010;border-radius:16px;padding:20px;margin-bottom:14px}
+.swl{font-size:11px;color:#8a7040;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.swv{font-size:32px;font-weight:700;color:var(--y);letter-spacing:-.02em}
+.sws{font-size:12px;color:#8a7040;margin-top:4px}
+.cat{display:flex;align-items:center;padding:12px 14px;background:var(--s);border-radius:12px;margin-bottom:6px;border:1px solid var(--b);gap:12px}
+.cn{font-size:13px;font-weight:500;min-width:90px}
+.cb{flex:1}.cbg{background:var(--b);border-radius:99px;height:4px}
+.cbf{height:100%;border-radius:99px;background:var(--y)}
+.cv2{font-size:13px;font-weight:600;color:var(--y);min-width:60px;text-align:right}
+/* CONFIG */
+.ctit{font-size:18px;font-weight:700;margin-bottom:6px}
+.csub2{font-size:13px;color:var(--m);margin-bottom:20px}
+.sbtn{width:100%;padding:16px;border-radius:14px;border:none;background:var(--bl);color:#0a0a1a;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit}
+/* NAV */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--s);border-top:1px solid var(--b);display:flex;padding:10px 0 24px;z-index:50}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:transparent;color:var(--m);font-size:10px;font-family:inherit;font-weight:500;padding:4px 0}
+.ni.on{color:var(--g)}
+.ic{font-size:20px;line-height:1}
+/* TOAST */
+.tst{position:fixed;top:24px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100;white-space:nowrap}
+.tst.ok{background:var(--g);color:#0a1a0a}
+.tst.er{background:var(--r);color:#1a0a0a}
+.tst.sh{opacity:1}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="hdr">
+    <div class="hdr-l">
+      <div class="gr" id="hmes"></div>
+      <div class="mo">Financas</div>
+    </div>
+    <div class="hdr-r">
+      <div class="dt" id="hdata"></div>
+      <button class="rbtn" onclick="load()">Atualizar</button>
+    </div>
+  </div>
+
+  <div class="scr on" id="s-painel"><div class="load" id="painel-c">Carregando...</div></div>
+
+  <div class="scr" id="s-lancar">
+    <div class="ftit">Novo lancamento</div>
+    <div class="fsub">O que voce quer registrar?</div>
+    <div class="tgrid">
+      <button class="tbtn" onclick="selTipo(this,'g')">Gasto</button>
+      <button class="tbtn" onclick="selTipo(this,'r')">Receita</button>
+    </div>
+    <div class="fld"><label>Descricao</label><input type="text" id="f-desc" placeholder="Ex: Almoco, Reembolso..."></div>
+    <div class="fld"><label>Valor (R$)</label><input type="number" id="f-val" placeholder="0.00" inputmode="decimal" step="0.01"></div>
+    <div class="gfields" id="gf">
+      <div class="fld">
+        <label>Meio de pagamento</label>
+        <div class="mgrid">
+          <button class="mbtn" onclick="selMeio(this,'pix')">PIX / CC</button>
+          <button class="mbtn" onclick="selMeio(this,'cc')">Cartao</button>
+          <button class="mbtn" onclick="selMeio(this,'sw')">Swile</button>
+        </div>
+      </div>
+      <div class="fld pfield" id="pf">
+        <label>Parcelamento</label>
+        <div class="frow">
+          <div><label style="font-size:10px;margin-bottom:4px;display:block">Num. parcelas</label><input type="number" id="f-np" value="1" min="1" max="48" inputmode="numeric"></div>
+          <div><label style="font-size:10px;margin-bottom:4px;display:block">Parcela atual</label><input type="number" id="f-pa" value="1" min="1" max="48" inputmode="numeric"></div>
+        </div>
+      </div>
+      <div class="fld">
+        <label>Categoria</label>
+        <select id="f-cat">
+          <option value="">Selecione...</option>
+          <option>Alimentacao</option><option>Transporte</option><option>Saude</option>
+          <option>Lazer</option><option>Casa</option><option>Assinatura</option>
+          <option>Presente</option><option>Carro</option><option>Pessoal</option><option>Outro</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label>Recorrente?</label>
+        <select id="f-rec"><option value="Nao">Nao</option><option value="Sim">Sim</option></select>
+      </div>
+    </div>
+    <button class="lbtn" id="lbtn" onclick="lancar()">Selecione o tipo acima</button>
+  </div>
+
+  <div class="scr" id="s-swile"><div class="load" id="swile-c">Carregando...</div></div>
+
+  <div class="scr" id="s-cfg">
+    <div class="ctit">Configuracao do mes</div>
+    <div class="csub2">Atualize no inicio de cada mes.</div>
+    <div class="fld"><label>Salario (R$)</label><input type="number" id="c-sal"></div>
+    <div class="fld"><label>Dia do salario</label><input type="number" id="c-dia" placeholder="Ex: 29" min="1" max="31"></div>
+    <div class="fld"><label>Meta de investimento (R$)</label><input type="number" id="c-meta"></div>
+    <div class="fld"><label>Swile mensal (R$)</label><input type="number" id="c-swm"></div>
+    <div class="fld"><label>Saldo atual Swile (R$)</label><input type="number" id="c-sws"></div>
+    <div class="fld"><label>Fixos recorrentes (R$)</label><input type="number" id="c-fix"></div>
+    <button class="sbtn" onclick="salvarCfg()">Salvar configuracao</button>
+  </div>
+
+  <div class="nav">
+    <button class="ni on" id="n-painel" onclick="tab('painel')"><span class="ic">&#9633;</span>Painel</button>
+    <button class="ni" id="n-lancar" onclick="tab('lancar')"><span class="ic">&#43;</span>Lancar</button>
+    <button class="ni" id="n-swile" onclick="tab('swile')"><span class="ic">&#9672;</span>Swile</button>
+    <button class="ni" id="n-cfg" onclick="tab('cfg')"><span class="ic">&#9881;</span>Config</button>
+  </div>
+</div>
+<div class="tst" id="tst"></div>
+
+<script>
+const URL = 'https://script.google.com/macros/s/AKfycbx4AC6djmaTij-DbavYFVE18pe2PQSOsglpqCgjhVlMkrdWcHEWmL939tzmK_mlIW7S/exec';
+let meio=null, tipo=null;
+let D={cfg:{},lancs:[],swile:[]};
+
+// ---- UTILS ----
+function fmt(v){
+  if(isNaN(v)||v==null)return'R$ 0,00';
+  return'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function toast(msg,t='ok'){
+  const e=document.getElementById('tst');
+  e.textContent=msg;e.className='tst '+t+' sh';
+  setTimeout(()=>e.classList.remove('sh'),2500);
+}
+function n(v){
+  return parseFloat(String(v||'0').replace(/[^\d.,\-]/g,'').replace(',','.'))||0;
+}
+
+// ---- DATE PARSING ----
+// Google Sheets exporta datas como YYYY-DD-MMT (dia e mes invertidos vs ISO padrao)
+function getMesAno(raw){
+  const s=String(raw||'').trim();
+  if(!s)return[0,0];
+  if(s.includes('/')){
+    const p=s.split('/');
+    if(p.length>=3)return[parseInt(p[1]),parseInt(p[2].slice(0,4))];
+  }
+  if(s.includes('T')){
+    const p=s.slice(0,10).split('-');
+    if(p.length===3){
+      // formato Google Sheets: YYYY-DD-MM (nao YYYY-MM-DD)
+      return[parseInt(p[2]),parseInt(p[0])];
+    }
+  }
+  return[0,0];
+}
+function ehMesAtual(raw){
+  const h=new Date();
+  const[m,a]=getMesAno(raw);
+  return m===h.getMonth()+1&&a===h.getFullYear();
+}
+function fmtData(raw){
+  const s=String(raw||'').trim();
+  if(s.includes('/'))return s.slice(0,10);
+  if(s.includes('T')){
+    const p=s.slice(0,10).split('-');
+    if(p.length===3)return`${p[1]}/${p[2]}/${p[0]}`;
+  }
+  return s.slice(0,10);
+}
+
+// ---- API ----
+async function get(aba,range){
+  const r=await fetch(`${URL}?aba=${aba}&range=${range}`);
+  const d=await r.json();
+  return d.values||[];
+}
+async function post(body){
+  const r=await fetch(URL,{method:'POST',body:JSON.stringify(body)});
+  return r.json();
+}
+
+// ---- LOAD ----
+async function load(){
+  try{
+    const[cr,lr,sr]=await Promise.all([
+      get('Configuracao','A1:B6'),
+      get('Lancamentos','A2:G500'),
+      get('Swile','A2:D500')
+    ]);
+    D.cfg={};
+    cr.forEach(r=>{if(r[0])D.cfg[r[0]]=r[1]});
+    D.lancs=lr.filter(r=>r[1]).map((r,i)=>({d:r[0],desc:r[1],val:n(r[2]),meio:r[3],cat:r[4],rec:r[5],parc:r[6],idx:i+2}));
+    D.swile=sr.filter(r=>r[1]).map((r,i)=>({d:r[0],desc:r[1],val:n(r[2]),cat:r[3],idx:i+2}));
+    renderPainel();
+    renderSwile();
+  }catch(e){
+    toast('Erro ao carregar.','er');
+    console.error(e);
+  }
+}
+
+// ---- PAINEL ----
+function renderPainel(){
+  const c=D.cfg;
+  const sal=n(c['Sal\u00e1rio']||c['Salario']);
+  const dia=parseInt(c['Dia do Sal\u00e1rio']||c['Dia do Salario']||c['Dia do salario']||'1');
+  const meta=n(c['Meta Investimento']);
+  const fix=n(c['Fixos Recorrentes']);
+  const swm=n(c['Swile Mensal'])||2000;
+  const sws=n(c['Swile Saldo Atual']);
+
+  const hoje=new Date();
+  const aguarda=hoje.getDate()<dia;
+  const salCont=aguarda?0:sal;
+
+  // gastos do mes atual
+  let gCC=0,gCT=0,rec=0;
+  D.lancs.filter(l=>ehMesAtual(l.d)).forEach(l=>{
+    if(l.val>0){rec+=l.val;return;}
+    if(l.meio==='Cartao')gCT+=Math.abs(l.val);
+    else gCC+=Math.abs(l.val);
+  });
+
+  const tot=gCC+gCT;
+  const lim=salCont+rec-meta-fix;
+  const disp=lim-tot;
+  const danger=disp<0&&!aguarda;
+  const pct=lim>0?Math.min((tot/lim)*100,100):0;
+
+  let cls=aguarda?'wt':danger?'ng':'ok';
+  let sub=aguarda?`Salario cai dia ${dia}`:danger?'Consumindo meta: '+fmt(Math.abs(disp)):'Meta de '+fmt(meta)+' intacta';
+
+  // ultimos lancamentos
+  const ul=[...D.lancs].reverse().slice(0,8);
+  const lHTML=ul.length===0?'<div class="empty">Nenhum lancamento ainda.</div>':ul.map(l=>{
+    const rec=l.val>0;
+    const b=rec?'brc':l.meio==='Cartao'?'bct':l.meio==='Swile'?'bsw':'bcc';
+    const bl=rec?'Receita':l.meio==='Cartao'?'Cartao':l.meio==='Swile'?'Swile':'PIX';
+    const parc=l.parc?`<span class="lp">${l.parc}</span>`:'';
+    const d=l.desc.replace(/'/g,"\\'");
+    return`<div class="lanc">
+      <div class="ll"><div class="ld">${l.desc}</div><div class="lm">${fmtData(l.d)}${l.cat?' · '+l.cat:''}</div></div>
+      <div class="lmid"><span class="bdg ${b}">${bl}</span>${parc}<span class="lv ${rec?'rec':'gasto'}">${rec?'+':'-'}${fmt(Math.abs(l.val))}</span></div>
+      <button class="xbtn" onclick="del('Lancamentos',${l.idx},'${d}')">&#10005;</button>
+    </div>`;
+  }).join('');
+
+  document.getElementById('painel-c').outerHTML=`<div id="painel-c">
+    <div class="disp ${cls}">
+      <div class="clb">Disponivel para gastar</div>
+      <div class="cvb">${fmt(disp)}</div>
+      <div class="csb">${sub}</div>
+      <div><div class="pbg"><div class="pfl" style="width:${pct}%;background:${danger?'var(--r)':aguarda?'var(--bl)':'var(--g)'}"></div></div>
+      <div class="plb"><span>Gasto: ${fmt(tot)}</span><span>Limite: ${fmt(lim)}</span></div></div>
+    </div>
+    <div class="grid">
+      <div class="card"><div class="clb">Conta corrente</div><div class="cv g">${fmt(salCont+rec-fix-gCC-gCT)}</div><div class="csb">Saldo estimado</div></div>
+      <div class="card"><div class="clb">Swile</div><div class="cv y">${fmt(aguarda?0:sws)}</div><div class="csb">Saldo atual</div></div>
+      <div class="card full"><div class="clb">Cartao de credito</div><div class="cv bl">${fmt(gCT)}</div><div class="csb">Gasto esse mes</div></div>
+    </div>
+    <div class="stit">Lancamentos</div>${lHTML}
+  </div>`;
+}
+
+// ---- SWILE ----
+function renderSwile(){
+  const c=D.cfg;
+  const dia=parseInt(c['Dia do Sal\u00e1rio']||c['Dia do Salario']||c['Dia do salario']||'1');
+  const aguarda=new Date().getDate()<dia;
+  const swm=n(c['Swile Mensal'])||2000;
+  const sws=aguarda?0:n(c['Swile Saldo Atual']);
+  const hoje=new Date();
+  const dr=new Date(hoje.getFullYear(),hoje.getMonth()+1,0).getDate()-hoje.getDate();
+  const pct=swm>0?Math.min(((swm-sws)/swm)*100,100):0;
+
+  const sl=[...D.swile].reverse().slice(0,8);
+  const lHTML=sl.map(l=>{
+    const d=l.desc.replace(/'/g,"\\'");
+    return`<div class="lanc">
+      <div class="ll"><div class="ld">${l.desc}</div><div class="lm">${fmtData(l.d)}${l.cat?' · '+l.cat:''}</div></div>
+      <div class="lmid"><span class="bdg bsw">Swile</span><span class="lv gasto">-${fmt(Math.abs(l.val))}</span></div>
+      <button class="xbtn" onclick="del('Swile',${l.idx},'${d}')">&#10005;</button>
+    </div>`;
+  }).join('')||'<div class="empty">Nenhum lancamento Swile ainda.</div>';
+
+  document.getElementById('swile-c').outerHTML=`<div id="swile-c">
+    <div class="swh">
+      <div class="swl">Saldo Swile</div>
+      <div class="swv">${fmt(sws)}</div>
+      <div class="sws">${aguarda?`Swile cai dia ${dia}`:dr+' dias restantes · mensal '+fmt(swm)}</div>
+      <div style="margin-top:14px"><div class="pbg"><div class="pfl" style="width:${pct}%;background:var(--y)"></div></div>
+      <div class="plb" style="color:#8a7040"><span>Usado: ${fmt(swm-sws)}</span><span>Total: ${fmt(swm)}</span></div></div>
+    </div>
+    <div class="stit">Lancamentos Swile</div>${lHTML}
+    <div style="margin-top:16px;padding:14px;background:var(--s);border-radius:12px;border:1px solid var(--b)">
+      <div style="font-size:11px;color:var(--m);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">Atualizar saldo Swile</div>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="sw-upd" placeholder="Ex: 450.00" style="flex:1;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:10px 12px;color:var(--t);font-size:14px;font-family:inherit;outline:none">
+        <button onclick="updSwile()" style="background:var(--y);color:#1a1000;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Salvar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---- TABS ----
+function tab(t){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('s-'+t).classList.add('on');
+  document.getElementById('n-'+t).classList.add('on');
+  if(t==='cfg')fillCfg();
+}
+
+// ---- FORM ----
+function selTipo(btn,t){
+  document.querySelectorAll('.tbtn').forEach(b=>b.className='tbtn');
+  tipo=t;btn.classList.add(t==='g'?'sg':'sr');
+  const gf=document.getElementById('gf');
+  const lb=document.getElementById('lbtn');
+  if(t==='g'){gf.classList.add('on');lb.textContent='Registrar gasto';lb.className='lbtn g';}
+  else{gf.classList.remove('on');lb.textContent='Registrar receita';lb.className='lbtn r';}
+}
+function selMeio(btn,m){
+  document.querySelectorAll('.mbtn').forEach(b=>b.className='mbtn');
+  meio=m;btn.classList.add('s'+m);
+  document.getElementById('pf').classList[m==='cc'?'add':'remove']('on');
+}
+
+// ---- LANCAR ----
+async function lancar(){
+  if(!tipo){toast('Selecione Gasto ou Receita.','er');return;}
+  const desc=document.getElementById('f-desc').value.trim();
+  const val=parseFloat(document.getElementById('f-val').value);
+  if(!desc||!val){toast('Preencha descricao e valor.','er');return;}
+  if(tipo==='g'&&!meio){toast('Selecione o meio de pagamento.','er');return;}
+  const btn=document.getElementById('lbtn');
+  btn.disabled=true;btn.textContent='Salvando...';
+  const hoje=new Date();
+  const data=`${String(hoje.getDate()).padStart(2,'0')}/${String(hoje.getMonth()+1).padStart(2,'0')}/${hoje.getFullYear()}`;
+  let row,aba;
+  if(tipo==='r'){
+    aba='Lancamentos';row=[data,desc,String(val),'PIX / CC','Receita','Nao',''];
+  }else if(meio==='sw'){
+    aba='Swile';row=[data,desc,'-'+val,document.getElementById('f-cat').value||'Outro'];
+  }else{
+    aba='Lancamentos';
+    const cat=document.getElementById('f-cat').value||'Outro';
+    const rec=document.getElementById('f-rec').value;
+    const ml=meio==='cc'?'Cartao':'PIX / CC';
+    let parc='';
+    if(meio==='cc'){
+      const np=parseInt(document.getElementById('f-np').value)||1;
+      const pa=parseInt(document.getElementById('f-pa').value)||1;
+      const vp=(val/np).toFixed(2);
+      parc=np>1?`${pa}/${np}`:'';
+      row=[data,desc,'-'+vp,ml,cat,rec,parc];
+    }else{
+      row=[data,desc,'-'+val,ml,cat,rec,''];
+    }
+  }
+  try{
+    await post({action:'append',aba,row});
+    toast(tipo==='r'?'Receita registrada!':'Gasto registrado!');
+    document.getElementById('f-desc').value='';
+    document.getElementById('f-val').value='';
+    document.getElementById('f-cat').value='';
+    document.getElementById('f-np').value='1';
+    document.getElementById('f-pa').value='1';
+    document.getElementById('pf').classList.remove('on');
+    document.getElementById('gf').classList.remove('on');
+    document.querySelectorAll('.mbtn').forEach(b=>b.className='mbtn');
+    document.querySelectorAll('.tbtn').forEach(b=>b.className='tbtn');
+    meio=null;tipo=null;
+    btn.className='lbtn';btn.textContent='Selecione o tipo acima';
+    await load();
+    setTimeout(()=>tab('painel'),800);
+  }catch(e){toast('Erro ao registrar.','er');}
+  btn.disabled=false;
+}
+
+// ---- DELETE ----
+async function del(aba,idx,desc){
+  if(!confirm(`Excluir "${desc}"?`))return;
+  try{await post({action:'delete',aba,row:idx});toast('Excluido!');await load();}
+  catch(e){toast('Erro ao excluir.','er');}
+}
+
+// ---- CONFIG ----
+function fillCfg(){
+  const c=D.cfg;
+  document.getElementById('c-sal').value=n(c['Sal\u00e1rio']||c['Salario'])||'';
+  document.getElementById('c-dia').value=c['Dia do Sal\u00e1rio']||c['Dia do Salario']||c['Dia do salario']||'';
+  document.getElementById('c-meta').value=n(c['Meta Investimento'])||'';
+  document.getElementById('c-swm').value=n(c['Swile Mensal'])||'';
+  document.getElementById('c-sws').value=n(c['Swile Saldo Atual'])||'';
+  document.getElementById('c-fix').value=n(c['Fixos Recorrentes'])||'';
+}
+async function salvarCfg(){
+  const s=document.getElementById('c-sal').value;
+  const d=document.getElementById('c-dia').value;
+  const m=document.getElementById('c-meta').value;
+  const sw=document.getElementById('c-swm').value;
+  const ss=document.getElementById('c-sws').value;
+  const f=document.getElementById('c-fix').value;
+  if(!s||!d||!m||!sw||!f){toast('Preencha todos os campos.','er');return;}
+  try{
+    await post({action:'write',aba:'Configuracao',range:'A1:B6',values:[
+      ['Sal\u00e1rio',s],['Dia do Sal\u00e1rio',d],['Meta Investimento',m],
+      ['Swile Mensal',sw],['Swile Saldo Atual',ss||'0'],['Fixos Recorrentes',f]
+    ]});
+    toast('Configuracao salva!');
+    await load();
+  }catch(e){toast('Erro ao salvar.','er');}
+}
+async function updSwile(){
+  const v=document.getElementById('sw-upd').value;
+  if(!v){toast('Digite o saldo.','er');return;}
+  try{
+    await post({action:'write',aba:'Configuracao',range:'B5',values:[[v]]});
+    D.cfg['Swile Saldo Atual']=v;
+    toast('Saldo Swile atualizado!');
+    renderSwile();renderPainel();
+  }catch(e){toast('Erro.','er');}
+}
+
+// ---- INIT ----
+const h=new Date();
+const ms=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+document.getElementById('hmes').textContent=ms[h.getMonth()]+' '+h.getFullYear();
+document.getElementById('hdata').textContent='Hoje, '+h.getDate()+' '+ms[h.getMonth()].toLowerCase().slice(0,3);
+load();
+</script>
+</body>
+</html>
