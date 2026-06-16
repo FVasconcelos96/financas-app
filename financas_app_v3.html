@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Financas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #0f0f13; --surface: #1a1a22; --surface2: #22222e; --border: #2e2e3e;
+    --text: #f0f0f5; --muted: #7070a0; --green: #4ade80; --red: #f87171;
+    --blue: #60a5fa; --yellow: #fbbf24; --purple: #a78bfa;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; }
+  .phone { width: 100%; max-width: 430px; padding: 16px 16px 90px; min-height: 100vh; }
+  .header { padding: 20px 0 16px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .header-left .greeting { font-size: 12px; color: var(--muted); font-weight: 400; letter-spacing: 0.05em; text-transform: uppercase; }
+  .header-left .month { font-size: 22px; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .header-right .date { font-size: 12px; color: var(--muted); }
+  .refresh-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 11px; padding: 4px 10px; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .card-disponivel { border-radius: 16px; padding: 18px; margin-bottom: 10px; }
+  .card-disponivel.ok { background: linear-gradient(135deg, #1e2a1e 0%, #1a2e1a 100%); border: 1px solid #2e4a2e; }
+  .card-disponivel.danger { background: linear-gradient(135deg, #2a1e1e 0%, #2e1a1a 100%); border: 1px solid #4a2e2e; }
+  .card-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .card-disponivel.ok .card-label { color: #5a8a5a; }
+  .card-disponivel.danger .card-label { color: #8a5a5a; }
+  .card-value-big { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .card-disponivel.ok .card-value-big { color: var(--green); }
+  .card-disponivel.danger .card-value-big { color: var(--red); }
+  .card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .card-disponivel.danger .card-sub { color: #a07070; }
+  .progress-wrap { margin-top: 12px; }
+  .progress-bar-bg { background: var(--border); border-radius: 99px; height: 6px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+  .progress-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 5px; }
+  .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .card { background: var(--surface); border-radius: 16px; padding: 16px; border: 1px solid var(--border); }
+  .card.full { grid-column: 1 / -1; }
+  .card .card-label { color: var(--muted); }
+  .card-value { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .card-value.green { color: var(--green); }
+  .card-value.yellow { color: var(--yellow); }
+  .card-value.blue { color: var(--blue); }
+  .card .card-sub { color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .section-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 20px 0 10px; }
+  .lancamento { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--surface); border-radius: 12px; margin-bottom: 6px; border: 1px solid var(--border); }
+  .lanc-left { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .lanc-desc { font-size: 14px; font-weight: 500; color: var(--text); }
+  .lanc-meta { font-size: 11px; color: var(--muted); }
+  .lanc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .lanc-badge { font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badge-cc { background: #2a1f3d; color: var(--purple); }
+  .badge-pix { background: #1a2a1a; color: var(--green); }
+  .badge-swile { background: #2a2210; color: var(--yellow); }
+  .lanc-valor { font-size: 14px; font-weight: 600; color: var(--red); }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; }
+  .loading { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
+  .form-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .field input, .field select { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 14px; color: var(--text); font-size: 15px; font-family: 'Inter', sans-serif; outline: none; appearance: none; -webkit-appearance: none; }
+  .field input:focus, .field select:focus { border-color: var(--blue); }
+  .field select option { background: #1a1a22; }
+  .meio-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .meio-btn { padding: 13px 8px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+  .meio-btn.sel-pix { border-color: var(--green); color: var(--green); background: #1a2a1a; }
+  .meio-btn.sel-cc { border-color: var(--purple); color: var(--purple); background: #1e1a2e; }
+  .meio-btn.sel-swile { border-color: var(--yellow); color: var(--yellow); background: #2a2210; }
+  .btn-lancar { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--green); color: #0a1a0a; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; font-family: 'Inter', sans-serif; }
+  .btn-lancar:disabled { opacity: 0.5; cursor: not-allowed; }
+  .swile-header { background: linear-gradient(135deg, #2a2210 0%, #221a08 100%); border: 1px solid #3a3010; border-radius: 16px; padding: 20px; margin-bottom: 14px; }
+  .swile-saldo-label { font-size: 11px; color: #8a7040; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .swile-saldo-value { font-size: 32px; font-weight: 700; color: var(--yellow); letter-spacing: -0.02em; }
+  .swile-saldo-sub { font-size: 12px; color: #8a7040; margin-top: 4px; }
+  .cat-item { display: flex; align-items: center; padding: 12px 14px; background: var(--surface); border-radius: 12px; margin-bottom: 6px; border: 1px solid var(--border); gap: 12px; }
+  .cat-name { font-size: 13px; font-weight: 500; min-width: 90px; }
+  .cat-bar-wrap { flex: 1; }
+  .cat-bar-bg { background: var(--border); border-radius: 99px; height: 4px; }
+  .cat-bar-fill { height: 100%; border-radius: 99px; background: var(--yellow); }
+  .cat-valor { font-size: 13px; font-weight: 600; color: var(--yellow); min-width: 60px; text-align: right; }
+  .config-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .config-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .btn-salvar { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--blue); color: #0a0a1a; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; font-family: 'Inter', sans-serif; }
+  .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--surface); border-top: 1px solid var(--border); display: flex; padding: 10px 0 24px; z-index: 50; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; border: none; background: transparent; color: var(--muted); font-size: 10px; font-family: 'Inter', sans-serif; font-weight: 500; padding: 4px 0; }
+  .nav-item.active { color: var(--green); }
+  .nav-icon { font-size: 20px; line-height: 1; }
+  .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); padding: 10px 22px; border-radius: 99px; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; white-space: nowrap; }
+  .toast.success { background: var(--green); color: #0a1a0a; }
+  .toast.error { background: var(--red); color: #1a0a0a; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="header">
+    <div class="header-left">
+      <div class="greeting" id="header-mes"></div>
+      <div class="month">Financas</div>
+    </div>
+    <div class="header-right">
+      <div class="date" id="header-data"></div>
+      <button class="refresh-btn" onclick="carregarTudo()">Atualizar</button>
+    </div>
+  </div>
+
+  <div class="screen active" id="screen-painel">
+    <div id="painel-content"><div class="loading">Carregando...</div></div>
+  </div>
+
+  <div class="screen" id="screen-lancar">
+    <div class="form-title">Novo lancamento</div>
+    <div class="field"><label>Descricao</label><input type="text" id="f-desc" placeholder="Ex: Almoco, Uber, ENEL..."></div>
+    <div class="field"><label>Valor (R$)</label><input type="number" id="f-valor" placeholder="0.00" inputmode="decimal" step="0.01"></div>
+    <div class="field">
+      <label>Meio de pagamento</label>
+      <div class="meio-grid">
+        <button class="meio-btn" onclick="selectMeio(this,'pix')">PIX / CC</button>
+        <button class="meio-btn" onclick="selectMeio(this,'cc')">Cartao</button>
+        <button class="meio-btn" onclick="selectMeio(this,'swile')">Swile</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Categoria</label>
+      <select id="f-cat">
+        <option value="">Selecione...</option>
+        <option>Alimentacao</option><option>Transporte</option><option>Saude</option>
+        <option>Lazer</option><option>Casa</option><option>Assinatura</option>
+        <option>Presente</option><option>Outro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Recorrente?</label>
+      <select id="f-rec"><option value="Nao">Nao</option><option value="Sim">Sim</option></select>
+    </div>
+    <button class="btn-lancar" id="btn-lancar" onclick="lancar()">Registrar gasto</button>
+  </div>
+
+  <div class="screen" id="screen-swile">
+    <div id="swile-content"><div class="loading">Carregando...</div></div>
+  </div>
+
+  <div class="screen" id="screen-config">
+    <div class="config-title">Configuracao do mes</div>
+    <div class="config-sub">Atualize no inicio de cada mes.</div>
+    <div class="field"><label>Salario (R$)</label><input type="number" id="c-salario"></div>
+    <div class="field"><label>Meta de investimento (R$)</label><input type="number" id="c-meta"></div>
+    <div class="field"><label>Swile mensal (R$)</label><input type="number" id="c-swile"></div>
+    <div class="field"><label>Fixos recorrentes (R$)</label><input type="number" id="c-fixos"></div>
+    <button class="btn-salvar" onclick="salvarConfig()">Salvar configuracao</button>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item active" id="nav-painel" onclick="switchTab('painel')"><span class="nav-icon">&#9633;</span>Painel</button>
+    <button class="nav-item" id="nav-lancar" onclick="switchTab('lancar')"><span class="nav-icon">&#43;</span>Lancar</button>
+    <button class="nav-item" id="nav-swile" onclick="switchTab('swile')"><span class="nav-icon">&#9672;</span>Swile</button>
+    <button class="nav-item" id="nav-config" onclick="switchTab('config')"><span class="nav-icon">&#9881;</span>Config</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxurPfAl1646oxyVu4otjrAd5HPpBalKKiH2T5Kg7CIooDYjUBanVb1tXvmVbSyB4cP/exec';
+
+let meioSelecionado = null;
+let cache = { config: {}, lancamentos: [], swile: [], painel: {} };
+
+function fmt(v) {
+  if (isNaN(v) || v === null || v === undefined) return 'R$ 0,00';
+  return 'R$ ' + Math.abs(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function showToast(msg, tipo = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + tipo + ' show';
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+  if (tab === 'config') preencherConfig();
+}
+
+function selectMeio(btn, tipo) {
+  document.querySelectorAll('.meio-btn').forEach(b => b.className = 'meio-btn');
+  meioSelecionado = tipo;
+  btn.classList.add('sel-' + tipo);
+}
+
+async function fetchAba(aba, range) {
+  const url = `${SCRIPT_URL}?aba=${aba}&range=${range}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.values || [];
+}
+
+async function postScript(body) {
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+async function carregarTudo() {
+  try {
+    const [configRows, lancRows, swileRows, painelRows] = await Promise.all([
+      fetchAba('Configuracao', 'A1:B4'),
+      fetchAba('Lancamentos', 'A2:F200'),
+      fetchAba('Swile', 'A2:D200'),
+      fetchAba('Painel', 'A1:B10')
+    ]);
+
+    cache.config = {};
+    configRows.forEach(r => { if (r[0]) cache.config[r[0]] = parseFloat(String(r[1] || '0').replace(',', '.')); });
+
+    cache.lancamentos = lancRows.filter(r => r[1]);
+    cache.swile = swileRows.filter(r => r[1]);
+
+    cache.painel = {};
+    painelRows.forEach(r => { if (r[0]) cache.painel[r[0]] = parseFloat(String(r[1] || '0').replace(/[^0-9.,\-]/g, '').replace(',', '.')); });
+
+    renderPainel();
+    renderSwile();
+  } catch(e) {
+    showToast('Erro ao carregar. Verifique conexao.', 'error');
+    console.error(e);
+  }
+}
+
+function renderPainel() {
+  const cfg = cache.config;
+  const salario = cfg['Sal\u00e1rio'] || cfg['Salario'] || 0;
+  const meta = cfg['Meta Investimento'] || 0;
+  const fixos = cfg['Fixos Recorrentes'] || 0;
+  const swileMensal = cfg['Swile Mensal'] || 2000;
+
+  let gastoCC = 0, gastoCartao = 0, gastoSwile = 0;
+  cache.lancamentos.forEach(r => {
+    const v = Math.abs(parseFloat(String(r[2] || '0').replace(',', '.')));
+    if (r[3] === 'Cartao') gastoCartao += v;
+    else gastoCC += v;
+  });
+  cache.swile.forEach(r => {
+    gastoSwile += Math.abs(parseFloat(String(r[2] || '0').replace(',', '.')));
+  });
+
+  const totalGasto = gastoCC + gastoCartao;
+  const limiteGasto = salario - meta - fixos;
+  const disponivel = limiteGasto - totalGasto;
+  const isDanger = disponivel < 0;
+  const pctGasto = limiteGasto > 0 ? Math.min((totalGasto / limiteGasto) * 100, 100) : 0;
+  const saldoSwile = swileMensal - gastoSwile;
+
+  const lancs = cache.lancamentos.slice(-5).reverse();
+  const lancsHTML = lancs.length === 0
+    ? '<div class="empty-state">Nenhum lancamento ainda.<br>Use o botao Lancar para comecar.</div>'
+    : lancs.map(r => {
+        const meio = r[3] || '';
+        const badge = meio === 'Cartao' ? 'badge-cc' : meio === 'Swile' ? 'badge-swile' : 'badge-pix';
+        const label = meio === 'Cartao' ? 'Cartao' : meio === 'Swile' ? 'Swile' : 'PIX';
+        const v = Math.abs(parseFloat(String(r[2]||'0').replace(',','.')));
+        return `<div class="lancamento">
+          <div class="lanc-left"><div class="lanc-desc">${r[1]||'-'}</div><div class="lanc-meta">${r[0]||''} ${r[4]?'· '+r[4]:''}</div></div>
+          <div class="lanc-right"><span class="lanc-badge ${badge}">${label}</span><span class="lanc-valor">-${fmt(v)}</span></div>
+        </div>`;
+      }).join('');
+
+  document.getElementById('painel-content').innerHTML = `
+    <div class="card-disponivel ${isDanger?'danger':'ok'}">
+      <div class="card-label">Disponivel para gastar</div>
+      <div class="card-value-big">${fmt(disponivel)}</div>
+      <div class="card-sub">${isDanger
+        ? 'Consumindo meta de investimento: ' + fmt(Math.abs(disponivel))
+        : 'Meta de ' + fmt(meta) + ' intacta'}</div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pctGasto}%;background:${isDanger?'var(--red)':'var(--green)'};"></div></div>
+        <div class="progress-labels"><span>Gasto: ${fmt(totalGasto)}</span><span>Limite: ${fmt(limiteGasto)}</span></div>
+      </div>
+    </div>
+    <div class="cards-grid">
+      <div class="card"><div class="card-label">Conta corrente</div><div class="card-value green">${fmt(salario-fixos-gastoCC-gastoCartao)}</div><div class="card-sub">Saldo estimado</div></div>
+      <div class="card"><div class="card-label">Swile</div><div class="card-value yellow">${fmt(saldoSwile)}</div><div class="card-sub">de ${fmt(swileMensal)}</div></div>
+      <div class="card full"><div class="card-label">Cartao de credito</div><div class="card-value blue">${fmt(gastoCartao)}</div><div class="card-sub">Gasto esse mes</div></div>
+    </div>
+    <div class="section-title">Ultimos lancamentos</div>
+    ${lancsHTML}`;
+}
+
+function renderSwile() {
+  const swileMensal = cache.config['Swile Mensal'] || 2000;
+  let gastoTotal = 0;
+  const cats = {};
+  cache.swile.forEach(r => {
+    const v = Math.abs(parseFloat(String(r[2]||'0').replace(',','.')));
+    gastoTotal += v;
+    const cat = r[3] || 'Outro';
+    cats[cat] = (cats[cat]||0) + v;
+  });
+  const saldo = swileMensal - gastoTotal;
+  const pct = swileMensal > 0 ? Math.min((gastoTotal/swileMensal)*100,100) : 0;
+  const hoje = new Date();
+  const diasRestantes = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).getDate() - hoje.getDate();
+
+  const catsHTML = Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([cat,val]) => {
+    const p = swileMensal > 0 ? Math.min((val/swileMensal)*100,100) : 0;
+    return `<div class="cat-item"><div class="cat-name">${cat}</div><div class="cat-bar-wrap"><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${p}%;"></div></div></div><div class="cat-valor">${fmt(val)}</div></div>`;
+  }).join('') || '<div class="empty-state">Nenhum lancamento Swile ainda.</div>';
+
+  const lancsHTML = cache.swile.slice(-5).reverse().map(r => {
+    const v = Math.abs(parseFloat(String(r[2]||'0').replace(',','.')));
+    return `<div class="lancamento"><div class="lanc-left"><div class="lanc-desc">${r[1]||'-'}</div><div class="lanc-meta">${r[0]||''} ${r[3]?'· '+r[3]:''}</div></div><div class="lanc-right"><span class="lanc-badge badge-swile">Swile</span><span class="lanc-valor">-${fmt(v)}</span></div></div>`;
+  }).join('') || '<div class="empty-state">Nenhum lancamento ainda.</div>';
+
+  document.getElementById('swile-content').innerHTML = `
+    <div class="swile-header">
+      <div class="swile-saldo-label">Saldo Swile</div>
+      <div class="swile-saldo-value">${fmt(saldo)}</div>
+      <div class="swile-saldo-sub">Recebeu ${fmt(swileMensal)} este mes · ${diasRestantes} dias restantes</div>
+      <div class="progress-wrap" style="margin-top:14px;">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;background:var(--yellow);"></div></div>
+        <div class="progress-labels" style="color:#8a7040;"><span>Gasto: ${fmt(gastoTotal)}</span><span>Total: ${fmt(swileMensal)}</span></div>
+      </div>
+    </div>
+    <div class="section-title">Por categoria</div>${catsHTML}
+    <div class="section-title">Lancamentos Swile</div>${lancsHTML}`;
+}
+
+function preencherConfig() {
+  const cfg = cache.config;
+  document.getElementById('c-salario').value = cfg['Sal\u00e1rio'] || cfg['Salario'] || '';
+  document.getElementById('c-meta').value = cfg['Meta Investimento'] || '';
+  document.getElementById('c-swile').value = cfg['Swile Mensal'] || '';
+  document.getElementById('c-fixos').value = cfg['Fixos Recorrentes'] || '';
+}
+
+async function salvarConfig() {
+  const s = document.getElementById('c-salario').value;
+  const m = document.getElementById('c-meta').value;
+  const sw = document.getElementById('c-swile').value;
+  const f = document.getElementById('c-fixos').value;
+  if (!s||!m||!sw||!f) { showToast('Preencha todos os campos.','error'); return; }
+  try {
+    await postScript({ action: 'write', aba: 'Configuracao', range: 'B1:B4', values: [[s],[m],[sw],[f]] });
+    showToast('Configuracao salva!');
+    await carregarTudo();
+  } catch(e) { showToast('Erro ao salvar.','error'); }
+}
+
+async function lancar() {
+  const desc = document.getElementById('f-desc').value.trim();
+  const valor = document.getElementById('f-valor').value;
+  const cat = document.getElementById('f-cat').value || 'Outro';
+  const rec = document.getElementById('f-rec').value;
+  if (!desc||!valor||!meioSelecionado) { showToast('Preencha descricao, valor e meio.','error'); return; }
+  const btn = document.getElementById('btn-lancar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  const hoje = new Date();
+  const data = `${String(hoje.getDate()).padStart(2,'0')}/${String(hoje.getMonth()+1).padStart(2,'0')}/${hoje.getFullYear()}`;
+  const meioLabel = meioSelecionado==='pix'?'PIX / CC':meioSelecionado==='cc'?'Cartao':'Swile';
+  const aba = meioSelecionado==='swile'?'Swile':'Lancamentos';
+  const row = meioSelecionado==='swile'
+    ? [data, desc, `-${valor}`, cat]
+    : [data, desc, `-${valor}`, meioLabel, cat, rec];
+  try {
+    await postScript({ action: 'append', aba, row });
+    showToast('Gasto registrado!');
+    document.getElementById('f-desc').value='';
+    document.getElementById('f-valor').value='';
+    document.getElementById('f-cat').value='';
+    document.querySelectorAll('.meio-btn').forEach(b=>b.className='meio-btn');
+    meioSelecionado=null;
+    await carregarTudo();
+    setTimeout(()=>switchTab('painel'),800);
+  } catch(e) { showToast('Erro ao registrar.','error'); }
+  btn.disabled=false; btn.textContent='Registrar gasto';
+}
+
+const hoje = new Date();
+const meses = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+document.getElementById('header-mes').textContent = meses[hoje.getMonth()] + ' ' + hoje.getFullYear();
+document.getElementById('header-data').textContent = 'Hoje, ' + hoje.getDate() + ' ' + meses[hoje.getMonth()].toLowerCase().slice(0,3);
+carregarTudo();
+</script>
+</body>
+</html>
